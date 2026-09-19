@@ -8,7 +8,8 @@ const app = express();
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const __dirname = path.resolve();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const frontendPath = path.join(__dirname, "../../frontend/dist");
 
 
 app.use("/api/auth/", authRoutes);
@@ -16,9 +17,9 @@ app.use("/api/message/", messagesRoutes);
 
 // make ready for deployment
 if(process.env.NODE_ENV === "production"){
-  app.use(express.static(path.join(__dirname, "../frontend/dist")))
+  app.use(express.static(frontendPath));
   app.get("*", (req,res)=>{
-    res.sendFile(path.join(__dirname,"../frontend","dist","index.html"));
+    res.sendFile(path.join(frontendPath,"index.html"));
   })
 
 }
