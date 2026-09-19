@@ -1,31 +1,46 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import authRoutes from './routes/auth.route.js';
-import messagesRoutes from './routes/message.route.js';
-import path from "path"
+import express from "express";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+import authRoutes from "./routes/auth.route.js";
+import messagesRoutes from "./routes/message.route.js";
 
 const app = express();
+
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Get the directory of this server.js file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Frontend production build
 const frontendPath = path.join(__dirname, "../../frontend/dist");
 
 
-app.use("/api/auth/", authRoutes);
-app.use("/api/message/", messagesRoutes);
+// Middleware
+app.use(express.json());
 
-// make ready for deployment
-if(process.env.NODE_ENV === "production"){
+
+// API routes
+app.use("/api/auth", authRoutes);
+app.use("/api/message", messagesRoutes);
+
+
+// Serve React frontend in production
+if (process.env.NODE_ENV === "production") {
   app.use(express.static(frontendPath));
-  app.get("*", (req,res)=>{
-    res.sendFile(path.join(frontendPath,"index.html"));
-  })
 
+  app.get("/{*splat}", (req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  });
 }
 
 
-
-app.listen(PORT,() => {
-  console.log('Server is running on port: ' + PORT);
+// Start server
+app.listen(PORT, () => {
+  console.log("Server is running on port: " + PORT);
 });
+
